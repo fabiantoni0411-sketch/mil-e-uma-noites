@@ -397,10 +397,10 @@ export default function LojaPage() {
   const status = getStatusAgora(config, horarios);
 
   return (
-    <div>
-      <SkylineBackground />
+  <div>
+    <SkylineBackground />
 
-      <header className="hero">
+    <header className="hero">
   <img
     className="logo-img"
     src="/logo.png"
