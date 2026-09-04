@@ -54,6 +54,7 @@ export default function ImprimirPage() {
 
       <div id="print-area">
         <div className="print-cover">
+          <img src="/logo.png" alt="Mil e Uma Noites" className="print-logo" />
           <h1>Mil e Uma Noites</h1>
           <h2>Shawarma e Lanches</h2>
         </div>
@@ -81,6 +82,7 @@ export default function ImprimirPage() {
           })}
         </div>
         <div className="print-contact">
+          <img src="/logo.png" alt="Mil e Uma Noites" className="print-logo" />
           <h2>Contato</h2>
           <p>WhatsApp: {formatPhone(config.whatsapp)}</p>
           {instagram && <p>Instagram: @{instagram}</p>}
