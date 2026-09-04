@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-import { tocarSomNotificacao } from '@/lib/utils';
+import { tocarSomNotificacao, tocarCampainha } from '@/lib/utils';
 import type { Session } from '@supabase/supabase-js';
 
 const TABS = [
@@ -28,6 +28,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
 
   const [avisoNovoPedido, setAvisoNovoPedido] = useState(false);
+  const [pedidosPendentes, setPedidosPendentes] = useState(0);
+  const [somAtivado, setSomAtivado] = useState(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const campainhaIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const tituloOriginal = 'Painel administrativo — Mil e Uma Noites';
+
+  function ativarAlertas() {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      audioCtxRef.current = new AudioCtx();
+      audioCtxRef.current.resume();
+      tocarSomNotificacao(audioCtxRef.current);
+    } catch (e) { /* ignora */ }
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    setSomAtivado(true);
+  }
+
+  async function contarPendentes() {
+    const { count } = await supabase
+      .from('pedidos')
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['Aguardando aprovação', 'Pendente']);
+    setPedidosPendentes(count || 0);
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -35,18 +61,57 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  // checa pedidos pendentes a cada 4 segundos (garante que o alarme continua mesmo sem realtime)
+  useEffect(() => {
+    if (!session) return;
+    contarPendentes();
+    const intervalo = setInterval(contarPendentes, 4000);
+    return () => clearInterval(intervalo);
+  }, [session]);
+
+  // toca a campainha em repetição enquanto houver pedido aguardando aprovação
+  useEffect(() => {
+    if (pedidosPendentes > 0 && somAtivado) {
+      setAvisoNovoPedido(true);
+      if (!campainhaIntervalRef.current) {
+        tocarCampainha(audioCtxRef.current);
+        campainhaIntervalRef.current = setInterval(() => tocarCampainha(audioCtxRef.current), 3000);
+      }
+    } else {
+      setAvisoNovoPedido(false);
+      if (campainhaIntervalRef.current) {
+        clearInterval(campainhaIntervalRef.current);
+        campainhaIntervalRef.current = null;
+      }
+    }
+  }, [pedidosPendentes, somAtivado]);
+
   useEffect(() => {
     if (!session) return;
     const canal = supabase
       .channel('pedidos-novos')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, () => {
-        tocarSomNotificacao();
-        setAvisoNovoPedido(true);
-        setTimeout(() => setAvisoNovoPedido(false), 5000);
+        contarPendentes();
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('🔔 Novo pedido recebido!', { body: 'Mil e Uma Noites — abra o painel de Pedidos.' });
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pedidos' }, () => {
+        contarPendentes();
       })
       .subscribe();
     return () => { supabase.removeChannel(canal); };
   }, [session]);
+
+  useEffect(() => {
+    if (!avisoNovoPedido) { document.title = tituloOriginal; return; }
+    let visivel = true;
+    const intervalo = setInterval(() => {
+      document.title = visivel ? '🔔 Novo pedido!' : tituloOriginal;
+      visivel = !visivel;
+    }, 1000);
+    return () => { clearInterval(intervalo); document.title = tituloOriginal; };
+  }, [avisoNovoPedido]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -91,17 +156,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="admin-body">
       {avisoNovoPedido && (
-        <div style={{
+        <Link href="/admin/pedidos" style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-          background: '#1f8a4c', color: '#fff', textAlign: 'center', padding: '10px', fontWeight: 600, fontSize: 14
+          background: '#b23a2f', color: '#fff', textAlign: 'center', padding: '12px', fontWeight: 700, fontSize: 14,
+          display: 'block', textDecoration: 'none'
         }}>
-          🔔 Novo pedido recebido!
-        </div>
+          🔔 {pedidosPendentes} pedido(s) aguardando aprovação — toque aqui para ver e aceitar
+        </Link>
       )}
       <div className="admin-header">
         <div className="admin-header-top">
           <h1>Painel administrativo</h1>
           <div className="admin-header-btns">
+            {!somAtivado && (
+              <button className="pill-btn" style={{ background: '#e3b23a', color: '#241c08', borderColor: '#e3b23a' }} onClick={ativarAlertas}>
+                🔔 Ativar alertas
+              </button>
+            )}
             <Link className="pill-btn" href="/">Ver loja</Link>
             <button className="pill-btn dark" onClick={handleLogout}>Sair</button>
           </div>
