@@ -39,6 +39,9 @@ export interface Horario {
   ativo: boolean;
   abre: string; // "18:00"
   fecha: string; // "23:59"
+  turno2_ativo: boolean;
+  abre2: string;
+  fecha2: string;
 }
 
 export interface ItemPedido {

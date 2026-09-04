@@ -23,19 +23,25 @@ export function getStatusAgora(config: Configuracoes, horarios: Horario[]) {
   const cfg = horarios.find(h => h.dia_semana === diaSemana);
   if (!cfg || !cfg.ativo) return { aberto: false, label: 'Fechado', hoje: null as string | null };
 
-  const [ah, am] = cfg.abre.split(':').map(Number);
-  const [fh, fm] = cfg.fecha.split(':').map(Number);
-  const abreMin = ah * 60 + am;
-  const fechaMin = fh * 60 + fm;
   const agoraMin = now.getHours() * 60 + now.getMinutes();
 
-  let aberto: boolean;
-  if (fechaMin <= abreMin) {
-    aberto = agoraMin >= abreMin || agoraMin < fechaMin;
-  } else {
-    aberto = agoraMin >= abreMin && agoraMin < fechaMin;
+  function dentroDoIntervalo(abre: string, fecha: string): boolean {
+    const [ah, am] = abre.split(':').map(Number);
+    const [fh, fm] = fecha.split(':').map(Number);
+    const abreMin = ah * 60 + am;
+    const fechaMin = fh * 60 + fm;
+    if (fechaMin <= abreMin) return agoraMin >= abreMin || agoraMin < fechaMin;
+    return agoraMin >= abreMin && agoraMin < fechaMin;
   }
-  return { aberto, label: aberto ? 'Aberto' : 'Fechado', hoje: `${cfg.abre} às ${cfg.fecha}` };
+
+  const noPrimeiroTurno = dentroDoIntervalo(cfg.abre, cfg.fecha);
+  const noSegundoTurno = cfg.turno2_ativo && dentroDoIntervalo(cfg.abre2, cfg.fecha2);
+  const aberto = noPrimeiroTurno || noSegundoTurno;
+
+  let hoje = `${cfg.abre} às ${cfg.fecha}`;
+  if (cfg.turno2_ativo) hoje += ` e ${cfg.abre2} às ${cfg.fecha2}`;
+
+  return { aberto, label: aberto ? 'Aberto' : 'Fechado', hoje };
 }
 
 export function getPrepAtual(config: Configuracoes): string {
