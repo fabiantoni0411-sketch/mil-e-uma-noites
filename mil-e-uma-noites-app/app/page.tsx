@@ -401,7 +401,6 @@ export default function LojaPage() {
       <SkylineBackground />
 
       <header className="hero">
-       <header className="hero">
   <img
     className="logo-img"
     src="/logo.png"
