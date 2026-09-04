@@ -346,8 +346,11 @@ export default function LojaPage() {
               <>
                 <div className="sheet-head"><h3>Seu pedido</h3><button onClick={() => setCartOpen(false)}>✕</button></div>
                 <div className="pix-box" style={{ marginBottom: 14 }}>
-                  🌙 Olá! Seja bem-vindo(a) ao <b>Mil e Uma Noites Shawarma e Lanches</b>! Preencha os dados abaixo pra gente preparar tudo com carinho.
+                  🌙 {nome.trim() ? <>Olá, <b>{nome.trim().split(' ')[0]}</b>! Seja bem-vindo(a) ao <b>Mil e Uma Noites Shawarma e Lanches</b>!</> : <>Olá! Seja bem-vindo(a) ao <b>Mil e Uma Noites Shawarma e Lanches</b>! Preencha os dados abaixo pra gente preparar tudo com carinho.</>}
                 </div>
+
+                <div className="field" style={{ marginTop: 0 }}><label>Seu nome</label><input type="text" value={nome} onChange={e => setNome(e.target.value)} placeholder="Como podemos te chamar?" autoFocus /></div>
+                <div className="field"><label>Telefone (WhatsApp)</label><input type="text" value={telefone} onChange={e => setTelefone(e.target.value)} placeholder="11999999999" /></div>
 
                 {cart.map(i => {
               const p = produtos.find(x => x.id === i.id);
@@ -381,9 +384,6 @@ export default function LojaPage() {
                 <div className="field"><label>Referência (opcional)</label><input type="text" value={referencia} onChange={e => setReferencia(e.target.value)} placeholder="Ponto de referência" /></div>
               </>
             )}
-
-            <div className="field"><label>Seu nome</label><input type="text" value={nome} onChange={e => setNome(e.target.value)} placeholder="Nome" /></div>
-            <div className="field"><label>Telefone (WhatsApp)</label><input type="text" value={telefone} onChange={e => setTelefone(e.target.value)} placeholder="11999999999" /></div>
 
             <div className="field">
               <label>Forma de pagamento</label>
