@@ -48,6 +48,7 @@ export function getPrepAtual(config: Configuracoes): string {
   const dia = new Date().getDay();
   return (dia === 5 || dia === 6) ? config.prep_fim_semana : config.prep_semana;
 }
+
 export function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
@@ -76,5 +77,33 @@ export function tocarSomNotificacao(ctxExistente?: AudioContext | null) {
     tocarNota(1175, 0.65, 0.3);
   } catch (e) {
     // navegador pode bloquear áudio sem interação prévia; ignora silenciosamente
+  }
+}
+
+// Toque contínuo, parecido com campainha de telefone tocando (dois tons alternando, alto e insistente)
+export function tocarCampainha(ctxExistente?: AudioContext | null) {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const ctx = ctxExistente || new AudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    const inicioBase = ctx.currentTime;
+    // padrão "ring-ring" clássico: dois tons rápidos alternando por ~1.2s
+    for (let ciclo = 0; ciclo < 6; ciclo++) {
+      const t = ciclo * 0.2;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = ciclo % 2 === 0 ? 950 : 1400;
+      gain.gain.setValueAtTime(0.001, inicioBase + t);
+      gain.gain.exponentialRampToValueAtTime(0.35, inicioBase + t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, inicioBase + t + 0.18);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(inicioBase + t);
+      osc.stop(inicioBase + t + 0.18);
+    }
+  } catch (e) {
+    // ignora silenciosamente
   }
 }
