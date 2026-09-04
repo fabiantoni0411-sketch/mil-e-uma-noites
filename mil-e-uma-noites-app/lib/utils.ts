@@ -48,15 +48,15 @@ export function getPrepAtual(config: Configuracoes): string {
   const dia = new Date().getDay();
   return (dia === 5 || dia === 6) ? config.prep_fim_semana : config.prep_semana;
 }
-
 export function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
-export function tocarSomNotificacao() {
+export function tocarSomNotificacao(ctxExistente?: AudioContext | null) {
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx = new AudioCtx();
+    const ctx = ctxExistente || new AudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
     const tocarNota = (freq: number, inicio: number, duracao: number) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -67,7 +67,7 @@ export function tocarSomNotificacao() {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + inicio + duracao);
       osc.connect(gain);
       gain.connect(ctx.destination);
-            osc.start(ctx.currentTime + inicio);
+      osc.start(ctx.currentTime + inicio);
       osc.stop(ctx.currentTime + inicio + duracao);
     };
     tocarNota(880, 0, 0.15);
