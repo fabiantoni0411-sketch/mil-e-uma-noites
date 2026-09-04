@@ -32,7 +32,7 @@ export default function HorariosPage() {
     await supabase.from('configuracoes').update({ [campo]: valor }).eq('id', 1);
   }
 
-  async function atualizarDia(dia: number, campo: 'ativo' | 'abre' | 'fecha', valor: boolean | string) {
+  async function atualizarDia(dia: number, campo: 'ativo' | 'abre' | 'fecha' | 'turno2_ativo' | 'abre2' | 'fecha2', valor: boolean | string) {
     await supabase.from('horarios').update({ [campo]: valor }).eq('dia_semana', dia);
     setHorarios(prev => prev.map(h => h.dia_semana === dia ? { ...h, [campo]: valor } as Horario : h));
   }
@@ -76,6 +76,18 @@ export default function HorariosPage() {
             <span>até</span>
             <input type="time" defaultValue={h.fecha} onBlur={e => atualizarDia(h.dia_semana, 'fecha', e.target.value)} />
           </div>
+          <div style={{ marginTop: 10 }}>
+            <label className="chk">
+              <input type="checkbox" checked={h.turno2_ativo} onChange={e => atualizarDia(h.dia_semana, 'turno2_ativo', e.target.checked)} /> Segundo turno neste dia
+            </label>
+          </div>
+          {h.turno2_ativo && (
+            <div className="times" style={{ marginTop: 8 }}>
+              <input type="time" defaultValue={h.abre2} onBlur={e => atualizarDia(h.dia_semana, 'abre2', e.target.value)} />
+              <span>até</span>
+              <input type="time" defaultValue={h.fecha2} onBlur={e => atualizarDia(h.dia_semana, 'fecha2', e.target.value)} />
+            </div>
+          )}
         </div>
       ))}
     </div>
