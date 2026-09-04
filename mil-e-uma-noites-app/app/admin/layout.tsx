@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
+import { tocarSomNotificacao } from '@/lib/utils';
 import type { Session } from '@supabase/supabase-js';
 
 const TABS = [
@@ -26,11 +27,55 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
 
+  const [avisoNovoPedido, setAvisoNovoPedido] = useState(false);
+  const [somAtivado, setSomAtivado] = useState(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const tituloOriginal = 'Painel administrativo — Mil e Uma Noites';
+
+  function ativarAlertas() {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      audioCtxRef.current = new AudioCtx();
+      audioCtxRef.current.resume();
+      tocarSomNotificacao(audioCtxRef.current);
+    } catch (e) { /* ignora */ }
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+    setSomAtivado(true);
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
     const { data: listener } = supabase.auth.onAuthStateChange((_event, sess) => setSession(sess));
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!session) return;
+    const canal = supabase
+      .channel('pedidos-novos')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'pedidos' }, () => {
+        tocarSomNotificacao(audioCtxRef.current);
+        setAvisoNovoPedido(true);
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('🔔 Novo pedido recebido!', { body: 'Mil e Uma Noites — abra o painel de Pedidos.' });
+        }
+        setTimeout(() => setAvisoNovoPedido(false), 15000);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(canal); };
+  }, [session]);
+
+  useEffect(() => {
+    if (!avisoNovoPedido) { document.title = tituloOriginal; return; }
+    let visivel = true;
+    const intervalo = setInterval(() => {
+      document.title = visivel ? '🔔 Novo pedido!' : tituloOriginal;
+      visivel = !visivel;
+    }, 1000);
+    return () => { clearInterval(intervalo); document.title = tituloOriginal; };
+  }, [avisoNovoPedido]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -74,10 +119,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="admin-body">
+      {avisoNovoPedido && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+          background: '#1f8a4c', color: '#fff', textAlign: 'center', padding: '10px', fontWeight: 600, fontSize: 14
+        }}>
+          🔔 Novo pedido recebido!
+        </div>
+      )}
       <div className="admin-header">
         <div className="admin-header-top">
           <h1>Painel administrativo</h1>
           <div className="admin-header-btns">
+            {!somAtivado && (
+              <button className="pill-btn" style={{ background: '#e3b23a', color: '#241c08', borderColor: '#e3b23a' }} onClick={ativarAlertas}>
+                🔔 Ativar alertas
+              </button>
+            )}
             <Link className="pill-btn" href="/">Ver loja</Link>
             <button className="pill-btn dark" onClick={handleLogout}>Sair</button>
           </div>
