@@ -13,10 +13,19 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 input,select,textarea{font-family:inherit;}
 img{max-width:100%;display:block;}
 
+/* ---------- FUNDO DECORATIVO (céu estrelado + skyline) ---------- */
+.page-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(91,134,201,.16), transparent 55%),
+    radial-gradient(ellipse at 80% 10%, rgba(205,159,79,.12), transparent 50%),
+    linear-gradient(180deg, #060a1e 0%, #0a1230 55%, #0d1836 100%);}
+.page-bg .star{position:absolute;background:var(--gold-bright);border-radius:50%;opacity:.5;animation:twinkle 4s ease-in-out infinite;}
+.page-bg .skyline-svg{position:absolute;bottom:0;left:0;width:100%;height:22vh;min-height:140px;}
+.hero, nav.cats, main.loja-content, .foot-loja, .cart-fab, .admin-link{position:relative;z-index:1;}
+
 /* ---------- LOJA ---------- */
-.hero{padding:44px 20px 30px;text-align:center;border-bottom:1px solid rgba(205,159,79,.35);
-  background:radial-gradient(ellipse at 20% 0%, rgba(91,134,201,.14), transparent 55%), radial-gradient(ellipse at 80% 15%, rgba(205,159,79,.10), transparent 50%);}
-.moon-mark{width:46px;height:46px;margin:0 auto 10px;}
+.hero{padding:44px 20px 30px;text-align:center;border-bottom:1px solid rgba(205,159,79,.35);}
+.logo-img{width:120px;height:auto;margin:0 auto 12px;filter:drop-shadow(0 4px 18px rgba(205,159,79,.35));}
 .kicker{font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;opacity:.85;}
 .hero h1{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(30px,8vw,46px);line-height:1.05;
   background:linear-gradient(180deg,var(--gold-bright),var(--gold) 60%,#a9803c);-webkit-background-clip:text;background-clip:text;color:transparent;}
@@ -189,21 +198,28 @@ main.loja-content{max-width:640px;margin:0 auto;padding:6px 18px 100px;}
 
 /* ---------- IMPRESSÃO ---------- */
 @media print{
+  @page{ margin: 14mm; }
+  html, body{ background:#0d1836 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   body *{visibility:hidden;}
   #print-area, #print-area *{visibility:visible;}
-  #print-area{display:block !important;position:absolute;top:0;left:0;width:100%;}
-  .print-page{page-break-after:always;padding:30px;}
-  .print-cover{text-align:center;padding-top:120px;}
-  .print-cover h1{font-family:'Cinzel',serif;font-size:44px;color:#111;}
-  .print-cover h2{font-family:'Cinzel',serif;font-size:18px;letter-spacing:.15em;text-transform:uppercase;margin-top:6px;color:#111;}
-  .print-cat-title{display:flex;align-items:center;gap:14px;margin-bottom:20px;border-bottom:3px solid #000;padding-bottom:10px;}
-  .print-cat-title img{width:60px;height:60px;object-fit:cover;border-radius:8px;}
-  .print-cat-title h2{font-family:'Cinzel',serif;font-size:24px;color:#111;}
-  .print-item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dotted #999;color:#111;}
+  #print-area{display:block !important;position:absolute;top:0;left:0;width:100%;background:#0d1836;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .print-cover{page-break-after:always;text-align:center;padding-top:120px;background:#0d1836;min-height:100vh;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .print-cover h1{font-family:'Cinzel',serif;font-size:44px;color:#f0d38a;}
+  .print-cover h2{font-family:'Cinzel',serif;font-size:18px;letter-spacing:.15em;text-transform:uppercase;margin-top:6px;color:#cd9f4f;}
+  .print-cat{page-break-inside:avoid;break-inside:avoid;margin-bottom:22px;padding:14px;
+    background:#12204a;border:1px solid #8a6a2f;border-radius:10px;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .print-cat-title{display:flex;align-items:center;gap:14px;margin-bottom:14px;border-bottom:2px solid #cd9f4f;padding-bottom:8px;}
+  .print-cat-title img{width:50px;height:50px;object-fit:cover;border-radius:8px;}
+  .print-cat-title h2{font-family:'Cinzel',serif;font-size:20px;color:#f0d38a;}
+  .print-item{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px dotted #8a6a2f;color:#f2ecdd;}
   .print-item .nm{font-weight:600;}
-  .print-item .ds{font-size:12px;color:#555;}
-  .print-contact{text-align:center;padding-top:100px;color:#111;}
-  .print-contact h2{font-family:'Cinzel',serif;font-size:26px;margin-bottom:20px;}
+  .print-item .ds{font-size:11.5px;color:#c9c3b3;}
+  .print-contact{page-break-before:always;text-align:center;padding-top:100px;color:#f2ecdd;background:#0d1836;min-height:100vh;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .print-contact h2{font-family:'Cinzel',serif;font-size:26px;margin-bottom:20px;color:#f0d38a;}
   .print-contact p{margin:6px 0;font-size:15px;}
 }
 #print-area{display:none;}
