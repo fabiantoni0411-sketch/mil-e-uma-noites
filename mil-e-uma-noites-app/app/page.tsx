@@ -7,6 +7,68 @@ import { brl, formatPhone, getStatusAgora, getPrepAtual } from '@/lib/utils';
 
 interface CartItem { id: string; qtd: number; }
 
+function SkylineBackground() {
+  const [stars, setStars] = useState<{ top: string; left: string; delay: string; size: string }[]>([]);
+  useEffect(() => {
+    setStars(Array.from({ length: 60 }).map(() => ({
+      top: Math.random() * 70 + '%',
+      left: Math.random() * 100 + '%',
+      delay: (Math.random() * 4) + 's',
+      size: Math.random() < 0.15 ? '3px' : '2px',
+    })));
+  }, []);
+  return (
+    <div className="page-bg">
+      {stars.map((s, i) => (
+        <span key={i} className="star" style={{ top: s.top, left: s.left, animationDelay: s.delay, width: s.size, height: s.size }} />
+      ))}
+      <svg className="skyline-svg" viewBox="0 0 1400 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <g fill="#050915" opacity="0.9">
+          <rect x="0" y="140" width="60" height="80" />
+          <circle cx="30" cy="130" r="26" />
+          <rect x="90" y="170" width="30" height="50" />
+          <polygon points="105,140 95,170 115,170" />
+          <rect x="150" y="100" width="70" height="120" />
+          <circle cx="185" cy="95" r="38" />
+          <rect x="170" y="40" width="10" height="55" />
+          <rect x="240" y="160" width="26" height="60" />
+          <polygon points="253,130 242,160 264,160" />
+          <rect x="290" y="120" width="90" height="100" />
+          <circle cx="335" cy="112" r="44" />
+          <rect x="318" y="45" width="10" height="67" />
+          <circle cx="323" cy="40" r="4" />
+          <rect x="410" y="175" width="24" height="45" />
+          <rect x="460" y="150" width="60" height="70" />
+          <circle cx="490" cy="140" r="30" />
+          <rect x="550" y="90" width="110" height="130" />
+          <circle cx="605" cy="82" r="52" />
+          <rect x="583" y="15" width="12" height="67" />
+          <circle cx="589" cy="10" r="5" />
+          <rect x="690" y="165" width="28" height="55" />
+          <polygon points="704,135 692,165 716,165" />
+          <rect x="740" y="130" width="80" height="90" />
+          <circle cx="780" cy="122" r="40" />
+          <rect x="850" y="170" width="24" height="50" />
+          <rect x="900" y="105" width="95" height="115" />
+          <circle cx="947" cy="98" r="46" />
+          <rect x="928" y="35" width="10" height="63" />
+          <rect x="1020" y="160" width="28" height="60" />
+          <polygon points="1034,130 1022,160 1046,160" />
+          <rect x="1080" y="115" width="85" height="105" />
+          <circle cx="1122" cy="108" r="42" />
+          <rect x="1102" y="45" width="10" height="63" />
+          <circle cx="1107" cy="40" r="4" />
+          <rect x="1200" y="170" width="26" height="50" />
+          <rect x="1250" y="145" width="65" height="75" />
+          <circle cx="1282" cy="136" r="32" />
+          <rect x="1340" y="170" width="60" height="50" />
+          <circle cx="1370" cy="160" r="26" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 export default function LojaPage() {
   const [loading, setLoading] = useState(true);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
@@ -45,7 +107,6 @@ export default function LojaPage() {
     setBairros(bs || []);
     setConfig(cfg as Configuracoes);
     setHorarios((hrs as Horario[]) || []);
-    if (cats && cats.length) setActiveCat(cats[0].id);
     setLoading(false);
   }
 
@@ -58,6 +119,23 @@ export default function LojaPage() {
     () => categorias.filter(c => produtos.some(p => p.categoria_id === c.id)),
     [categorias, produtos]
   );
+
+  const temLancamentos = useMemo(() => produtos.some(p => p.destacar_lancamento), [produtos]);
+
+  const abasVisiveis = useMemo(() => {
+    const lista = [...categoriasComProdutos];
+    if (temLancamentos) lista.unshift({ id: '__lancamentos__', nome: 'Lançamentos', imagem_url: null, ordem: -1 });
+    return lista;
+  }, [categoriasComProdutos, temLancamentos]);
+
+  const produtosDaAba = useMemo(() => {
+    if (activeCat === '__lancamentos__') return produtos.filter(p => p.destacar_lancamento);
+    return produtos.filter(p => p.categoria_id === activeCat);
+  }, [activeCat, produtos]);
+
+  useEffect(() => {
+    if (!activeCat && abasVisiveis.length) setActiveCat(abasVisiveis[0].id);
+  }, [abasVisiveis, activeCat]);
 
   function qtyOf(id: string) { return cart.find(i => i.id === id)?.qtd || 0; }
   function changeQty(id: string, delta: number) {
@@ -113,18 +191,28 @@ export default function LojaPage() {
       return;
     }
 
-    let msg = `Olá! Meu nome é ${nome}.\n\n*Pedido:*\n`;
-    itens.forEach(i => { msg += `${i.qtd}x ${i.nome} — ${brl(i.preco * i.qtd)}\n`; });
+    const agora = new Date();
+    const dataFmt = agora.toLocaleDateString('pt-BR');
+    const horaFmt = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+    let msg = `🌙 *Olá! Seja bem-vindo(a) ao Mil e Uma Noites!* 🌙\n`;
+    msg += `Que alegria receber seu pedido, ${nome.split(' ')[0]}! Aqui está o resumo:\n\n`;
+    msg += `✅ *Pedido recebido!*\n`;
+    msg += `📅 ${dataFmt} às ${horaFmt}\n\n`;
+    msg += `*Itens:*\n`;
+    itens.forEach(i => { msg += `➡️ ${i.qtd}x ${i.nome} — ${brl(i.preco * i.qtd)}\n`; });
+    msg += `\n👤 *Cliente:* ${nome}\n`;
+    msg += `📱 *Celular:* ${telefone}\n`;
+    msg += `💳 *Pagamento:* ${pagamento}\n\n`;
     if (entrega === 'entrega') {
-      msg += `\n*Entrega:* ${endereco || '(endereço)'} — ${bairroSelecionado?.nome || ''}`;
-      if (referencia) msg += `\nRef: ${referencia}`;
-      msg += `\nTaxa de entrega: ${brl(taxaEntrega)}`;
+      msg += `🛵 *Delivery* (taxa: ${taxaEntrega > 0 ? brl(taxaEntrega) : 'grátis 🎁'})\n`;
+      msg += `🏠 ${endereco || '(endereço)'} — ${bairroSelecionado?.nome || ''}\n`;
+      if (referencia) msg += `📍 Referência: ${referencia}\n`;
     } else {
-      msg += `\n*Retirada no local*`;
+      msg += `🏃 *Retirada no local*\n`;
     }
-    msg += `\n*Pagamento:* ${pagamento}`;
-    msg += `\n\n*Total: ${brl(totalFinal)}*`;
-    msg += `\n\nTelefone p/ contato: ${telefone}`;
+    msg += `\n*Total: ${brl(totalFinal)}*\n\n`;
+    msg += `Muito obrigado pelo seu pedido! Se precisar de algo é só chamar 😉`;
 
     const url = `https://wa.me/${config?.whatsapp}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
@@ -143,13 +231,9 @@ export default function LojaPage() {
 
   return (
     <div>
+      <SkylineBackground />
       <header className="hero">
-        <div className="moon-mark">
-          <svg viewBox="0 0 50 50" fill="none" width="100%" height="100%">
-            <path d="M30 6C20 8 13 17 13 27c0 12 9.5 21.5 21 21.5 6 0 11.4-2.5 15-6.5-3 1.3-6.3 2-9.8 2C26.4 44 17 34.6 17 23c0-7 3.4-13.2 8.6-17-.2 0-.4 0-.6.1z" fill="#f0d38a" />
-            <circle cx="37" cy="10" r="1.6" fill="#f0d38a" /><circle cx="42" cy="16" r="1" fill="#f0d38a" />
-          </svg>
-        </div>
+        <img className="logo-img" src="/logo.png" alt="Mil e Uma Noites" />
         <p className="kicker">Cardápio</p>
         <h1>Mil e Uma Noites</h1>
         <h2>Shawarma &amp; Lanches</h2>
@@ -160,53 +244,51 @@ export default function LojaPage() {
       </header>
 
       <nav className="cats">
-        {categoriasComProdutos.map(c => (
-          <button key={c.id} className={c.id === activeCat ? 'active' : ''} onClick={() => {
-            setActiveCat(c.id);
-            document.getElementById(`cat-${c.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }}>{c.nome}</button>
+        {abasVisiveis.map(c => (
+          <button key={c.id} className={c.id === activeCat ? 'active' : ''} onClick={() => setActiveCat(c.id)}>{c.nome}</button>
         ))}
       </nav>
 
       <main className="loja-content">
-        {categoriasComProdutos.map(cat => {
-          const prods = produtos.filter(p => p.categoria_id === cat.id);
-          return (
-            <section key={cat.id} className="cat-block" id={`cat-${cat.id}`}>
-              <div className="cat-title"><h3>{cat.nome}</h3></div>
-              {prods.map(p => {
-                const qty = qtyOf(p.id);
-                return (
-                  <div className="prod" key={p.id}>
-                    {p.imagem_url && <img className="prod-thumb" src={p.imagem_url} alt={p.nome} />}
-                    <div className="prod-info">
-                      <div className="prod-name">{p.nome} {p.tag_texto && <span className="tag">{p.tag_texto}</span>}</div>
-                      {p.descricao && <div className="prod-desc">{p.descricao}</div>}
-                      <div className="prod-bottom">
-                        <span className="prod-price">{brl(p.preco)}</span>
-                        {qty > 0 ? (
-                          <div className="qty-ctrl">
-                            <button onClick={() => changeQty(p.id, -1)}>−</button>
-                            <span>{qty}</span>
-                            <button onClick={() => changeQty(p.id, 1)}>+</button>
-                          </div>
-                        ) : (
-                          <button className="btn-add" onClick={() => changeQty(p.id, 1)}>+ Adicionar</button>
-                        )}
-                      </div>
+        {produtosDaAba.length === 0 && (
+          <p style={{ textAlign: 'center', color: 'var(--cream-dim)', padding: '40px 10px' }}>Nenhum produto nesta categoria no momento.</p>
+        )}
+        {produtosDaAba.length > 0 && (
+          <section className="cat-block">
+            <div className="cat-title"><h3>{abasVisiveis.find(a => a.id === activeCat)?.nome}</h3></div>
+            {produtosDaAba.map(p => {
+              const qty = qtyOf(p.id);
+              return (
+                <div className="prod" key={p.id}>
+                  {p.imagem_url && <img className="prod-thumb" src={p.imagem_url} alt={p.nome} />}
+                  <div className="prod-info">
+                    <div className="prod-name">{p.nome} {p.tag_texto && <span className="tag">{p.tag_texto}</span>}</div>
+                    {p.descricao && <div className="prod-desc">{p.descricao}</div>}
+                    <div className="prod-bottom">
+                      <span className="prod-price">{brl(p.preco)}</span>
+                      {qty > 0 ? (
+                        <div className="qty-ctrl">
+                          <button onClick={() => changeQty(p.id, -1)}>−</button>
+                          <span>{qty}</span>
+                          <button onClick={() => changeQty(p.id, 1)}>+</button>
+                        </div>
+                      ) : (
+                        <button className="btn-add" onClick={() => changeQty(p.id, 1)}>+ Adicionar</button>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </section>
-          );
-        })}
+                </div>
+              );
+            })}
+          </section>
+        )}
       </main>
 
       <footer className="foot-loja">
         <div style={{ fontSize: 11, color: 'var(--gold-line)', letterSpacing: '.2em', textTransform: 'uppercase', marginBottom: 16 }}>✦ Peça já o seu ✦</div>
         <a className="contact-btn whats" href={`https://wa.me/${config.whatsapp}`} target="_blank" rel="noopener noreferrer">WhatsApp: {formatPhone(config.whatsapp)}</a>
         <a className="contact-btn insta" href={`https://instagram.com/${config.instagram}`} target="_blank" rel="noopener noreferrer">Instagram @{config.instagram}</a>
+        <a className="contact-btn" style={{ border: '1px solid var(--gold-line)', color: 'var(--gold-bright)' }} href="/acompanhar">📦 Acompanhar meu pedido</a>
         <p className="closing">Um lanche, <b style={{ color: 'var(--gold-bright)', fontStyle: 'normal' }}>mil e um motivos</b> pra voltar.</p>
       </footer>
 
