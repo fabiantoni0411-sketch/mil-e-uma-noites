@@ -1,0 +1,1 @@
+app/acompanhar/page.tsx
