@@ -53,10 +53,11 @@ export function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
-export function tocarSomNotificacao() {
+export function tocarSomNotificacao(ctxExistente?: AudioContext | null) {
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    const ctx = new AudioCtx();
+    const ctx = ctxExistente || new AudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
     const tocarNota = (freq: number, inicio: number, duracao: number) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -67,12 +68,3 @@ export function tocarSomNotificacao() {
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + inicio + duracao);
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start(ctx.currentTime + inicio);
-      osc.stop(ctx.currentTime + inicio + duracao);
-    };
-    tocarNota(880, 0, 0.15);
-    tocarNota(1175, 0.15, 0.25);
-  } catch (e) {
-    // navegador pode bloquear áudio sem interação prévia; ignora silenciosamente
-  }
-}
