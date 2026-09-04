@@ -401,11 +401,12 @@ export default function LojaPage() {
       <SkylineBackground />
 
       <header className="hero">
-        <img
-          className="logo-img"
-          src="/logo.png"
-          alt="Mil e Uma Noites"
-        />
+       <header className="hero">
+  <img
+    className="logo-img"
+    src="/logo.png"
+    alt="Mil e Uma Noites"
+  />
 
         <p className="kicker">Cardápio</p>
 
