@@ -24,8 +24,8 @@ img{max-width:100%;display:block;}
 .hero, nav.cats, main.loja-content, .foot-loja, .cart-fab, .admin-link{position:relative;z-index:1;}
 
 /* ---------- LOJA ---------- */
-.hero{padding:44px 20px 30px;text-align:center;border-bottom:1px solid rgba(205,159,79,.35);}
-.logo-img{width:120px;height:auto;margin:0 auto 12px;filter:drop-shadow(0 4px 18px rgba(205,159,79,.35));}
+.hero{padding:44px 20px 30px;text-align:center;border-bottom:1px solid rgba(205,159,79,.35);display:flex;flex-direction:column;align-items:center;}
+.logo-img{width:min(240px,70vw);height:auto;margin:0 auto 16px;display:block;filter:drop-shadow(0 6px 24px rgba(205,159,79,.4));}
 .kicker{font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;opacity:.85;}
 .hero h1{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(30px,8vw,46px);line-height:1.05;
   background:linear-gradient(180deg,var(--gold-bright),var(--gold) 60%,#a9803c);-webkit-background-clip:text;background-clip:text;color:transparent;}
