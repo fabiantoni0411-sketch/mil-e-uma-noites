@@ -53,32 +53,36 @@ export default function ImprimirPage() {
       </div>
 
       <div id="print-area">
-        <div className="print-page print-cover">
+        <div className="print-cover">
+          <img src="/logo.png" alt="Mil e Uma Noites" className="print-logo" />
           <h1>Mil e Uma Noites</h1>
           <h2>Shawarma e Lanches</h2>
         </div>
-        {categorias.map(cat => {
-          const prods = produtos.filter(p => p.categoria_id === cat.id);
-          if (!prods.length) return null;
-          return (
-            <div className="print-page" key={cat.id}>
-              <div className="print-cat-title">
-                {cat.imagem_url && <img src={cat.imagem_url} alt="" />}
-                <h2>{cat.nome}</h2>
-              </div>
-              {prods.map(p => (
-                <div className="print-item" key={p.id}>
-                  <div>
-                    <div className="nm">{p.nome}</div>
-                    {p.descricao && <div className="ds">{p.descricao}</div>}
-                  </div>
-                  <div className="nm">{brl(p.preco)}</div>
+        <div style={{ padding: '10px' }}>
+          {categorias.map(cat => {
+            const prods = produtos.filter(p => p.categoria_id === cat.id);
+            if (!prods.length) return null;
+            return (
+              <div className="print-cat" key={cat.id}>
+                <div className="print-cat-title">
+                  {cat.imagem_url && <img src={cat.imagem_url} alt="" />}
+                  <h2>{cat.nome}</h2>
                 </div>
-              ))}
-            </div>
-          );
-        })}
-        <div className="print-page print-contact">
+                {prods.map(p => (
+                  <div className="print-item" key={p.id}>
+                    <div>
+                      <div className="nm">{p.nome}</div>
+                      {p.descricao && <div className="ds">{p.descricao}</div>}
+                    </div>
+                    <div className="nm">{brl(p.preco)}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+        <div className="print-contact">
+          <img src="/logo.png" alt="Mil e Uma Noites" className="print-logo" />
           <h2>Contato</h2>
           <p>WhatsApp: {formatPhone(config.whatsapp)}</p>
           {instagram && <p>Instagram: @{instagram}</p>}
