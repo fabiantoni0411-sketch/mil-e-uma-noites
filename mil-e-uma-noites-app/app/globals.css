@@ -25,7 +25,15 @@ img{max-width:100%;display:block;}
 
 /* ---------- LOJA ---------- */
 .hero{padding:44px 20px 30px;text-align:center;border-bottom:1px solid rgba(205,159,79,.35);display:flex;flex-direction:column;align-items:center;}
-.logo-img{width:min(240px,70vw);height:auto;margin:0 auto 16px;display:block;filter:drop-shadow(0 6px 24px rgba(205,159,79,.4));}
+.logo-img{
+  width:min(600px,92vw);
+  max-width:600px;
+  height:auto;
+  margin:0 auto 20px;
+  display:block;
+  object-fit:contain;
+  filter:drop-shadow(0 6px 24px rgba(205,159,79,.4));
+}
 .kicker{font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:8px;opacity:.85;}
 .hero h1{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(30px,8vw,46px);line-height:1.05;
   background:linear-gradient(180deg,var(--gold-bright),var(--gold) 60%,#a9803c);-webkit-background-clip:text;background-clip:text;color:transparent;}
