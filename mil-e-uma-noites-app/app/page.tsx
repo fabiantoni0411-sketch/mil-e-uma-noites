@@ -9,7 +9,7 @@ export default function LojaPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [config, setConfig] = useState<Configuracoes | null>(null);
-  const [categoriaAtiva, setCategoriaAtiva] = useState<number | null>(null);
+  const [categoriaAtiva, setCategoriaAtiva] = useState<string | null>(null);
   const [carrinho, setCarrinho] = useState<Record<number, number>>({});
   const [observacoes, setObservacoes] = useState('');
   const [nome, setNome] = useState('');
