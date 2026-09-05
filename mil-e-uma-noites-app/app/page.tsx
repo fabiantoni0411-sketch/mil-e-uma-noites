@@ -10,7 +10,7 @@ export default function LojaPage() {
   const [produtos, setProdutos] = useState<Produto[]>([]);
   const [config, setConfig] = useState<Configuracoes | null>(null);
   const [categoriaAtiva, setCategoriaAtiva] = useState<string | null>(null);
-  const [carrinho, setCarrinho] = useState<Record<number, number>>({});
+  const [carrinho, setCarrinho] = useState<Record<string, number>>({});
   const [observacoes, setObservacoes] = useState('');
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -53,14 +53,14 @@ export default function LojaPage() {
     }, 0);
   }, [produtosCarrinho, carrinho]);
 
-  function adicionarProduto(id: number) {
+  function adicionarProduto(id: string) {
     setCarrinho(prev => ({
       ...prev,
       [id]: (prev[id] || 0) + 1,
     }));
   }
 
-  function removerProduto(id: number) {
+  function removerProduto(id: string) {
     setCarrinho(prev => {
       const novo = { ...prev };
 
@@ -74,7 +74,7 @@ export default function LojaPage() {
     });
   }
 
-  function quantidadeProduto(id: number) {
+  function quantidadeProduto(id: string) {
     return carrinho[id] || 0;
   }
 
