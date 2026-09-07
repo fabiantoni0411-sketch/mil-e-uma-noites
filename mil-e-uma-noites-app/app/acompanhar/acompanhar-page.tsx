@@ -92,7 +92,7 @@ export default function AcompanharPage() {
               </div>
               <FluxoPedido status={p.status} />
               <div style={{ fontSize: 14, marginBottom: 6, marginTop: 8 }}>
-                {p.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ')}
+                {p.itens.map(i => `${i.qtd}x ${i.nome}${i.obs ? ` (Obs: ${i.obs})` : ''}`).join(', ')}
               </div>
               <div style={{ fontSize: 13, color: 'var(--cream-dim)', marginBottom: 8 }}>
                 {p.tipo_entrega === 'entrega' ? `Entrega — ${p.bairro_nome || ''}` : 'Retirada no local'} · {p.forma_pagamento}
