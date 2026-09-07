@@ -48,6 +48,7 @@ export interface ItemPedido {
   nome: string;
   qtd: number;
   preco: number;
+  obs?: string;
 }
 
 export interface Pedido {
