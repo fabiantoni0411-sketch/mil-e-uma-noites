@@ -49,7 +49,7 @@ export default function PedidosPage() {
       <p className="helper-text">Mostrando pedidos dos últimos 30 dias. Pedidos mais antigos continuam contando nos <b>Relatórios</b>, mas saem desta lista detalhada.</p>
       {!pedidos.length && <p className="empty-note">Nenhum pedido recebido nos últimos 30 dias.</p>}
       {pedidos.map(p => {
-        const itensTxt = p.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
+        const itensTxt = p.itens.map(i => `${i.qtd}x ${i.nome}${i.obs ? ` (Obs: ${i.obs})` : ''}`).join(', ');
         const entregaTxt = p.tipo_entrega === 'entrega'
           ? `Entrega: ${p.endereco || ''} — ${p.bairro_nome || ''}${p.referencia ? ` · Ref: ${p.referencia}` : ''} · Taxa ${brl(p.taxa_entrega)}`
           : 'Retirada no local';
