@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { Pedido } from '@/lib/types';
 import { brl } from '@/lib/utils';
 
-const STATUS_OPCOES = ['Pendente', 'Preparando', 'Saiu para entrega', 'Entregue'];
+const STATUS_OPCOES = ['Aguardando aprovação', 'Preparando', 'Saiu para entrega', 'Entregue'];
 
 export default function PedidosPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -49,11 +49,12 @@ export default function PedidosPage() {
       <p className="helper-text">Mostrando pedidos dos últimos 30 dias. Pedidos mais antigos continuam contando nos <b>Relatórios</b>, mas saem desta lista detalhada.</p>
       {!pedidos.length && <p className="empty-note">Nenhum pedido recebido nos últimos 30 dias.</p>}
       {pedidos.map(p => {
-        const itensTxt = p.itens.map(i => `${i.qtd}x ${i.nome}`).join(', ');
+        const itensTxt = p.itens.map(i => `${i.qtd}x ${i.nome}${i.obs ? ` (Obs: ${i.obs})` : ''}`).join(', ');
         const entregaTxt = p.tipo_entrega === 'entrega'
           ? `Entrega: ${p.endereco || ''} — ${p.bairro_nome || ''}${p.referencia ? ` · Ref: ${p.referencia}` : ''} · Taxa ${brl(p.taxa_entrega)}`
           : 'Retirada no local';
         const dataFmt = new Date(p.criado_em).toLocaleString('pt-BR');
+        const statusExibido = p.status === 'Pendente' ? 'Aguardando aprovação' : p.status;
         return (
           <div className="order-card" key={p.id}>
             <div className="title">{p.cliente_nome} · {p.cliente_telefone}</div>
@@ -63,7 +64,10 @@ export default function PedidosPage() {
             <div className="price">{brl(p.total)}</div>
             <label className="chk"><input type="checkbox" checked={p.pago} onChange={() => togglePago(p)} /> Pago</label>
             <div className="row2">
-              <select value={p.status} onChange={e => mudarStatus(p, e.target.value)}>
+              {statusExibido === 'Aguardando aprovação' && (
+                <button className="btn-row" style={{ padding: '9px 16px', fontSize: 13 }} onClick={() => mudarStatus(p, 'Preparando')}>✅ Aceitar pedido</button>
+              )}
+              <select value={statusExibido} onChange={e => mudarStatus(p, e.target.value)}>
                 {STATUS_OPCOES.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
               <button className="btn-outline danger" onClick={() => excluir(p)}>Excluir</button>
