@@ -325,11 +325,12 @@ export default function LojaPage() {
         <a className="contact-btn insta" href={`https://instagram.com/${config.instagram}`} target="_blank" rel="noopener noreferrer">Instagram @{config.instagram}</a>
         <a className="contact-btn" style={{ border: '1px solid var(--gold-line)', color: 'var(--gold-bright)' }} href="/acompanhar">📦 Acompanhar meu pedido</a>
         <p className="closing">Um lanche, <b style={{ color: 'var(--gold-bright)', fontStyle: 'normal' }}>mil e um motivos</b> pra voltar.</p>
-        <p style={{ marginTop: 24 }}><a href="/admin" style={{ fontSize: 11.5, color: 'var(--gold-line)' }}>painel administrativo</a></p>
         <p style={{ marginTop: 6, fontSize: 11, color: 'rgba(201,195,179,.35)' }}>
           Desenvolvido por Faby Bassitii
         </p>
       </footer>
+
+      <a href="/admin" className="admin-link">painel administrativo</a>
 
       {cartCount > 0 && (
         <button className="cart-fab" onClick={() => setCartOpen(true)}>
